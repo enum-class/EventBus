@@ -26,6 +26,11 @@ target_include_directories(SuperFactoryLib INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/superfactory>
     $<INSTALL_INTERFACE:superfactory>)
 
+add_library(EventBusLib INTERFACE)
+target_include_directories(EventBusLib INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
 find_package(GTest)
 find_package(Threads REQUIRED)
 
@@ -33,6 +38,7 @@ add_executable(EventProcessorTest tests/AllTests.cpp)
 target_link_libraries(EventProcessorTest
     SuperQueueLib
     SuperFactoryLib
+    EventBusLib
     Threads::Threads
     GTest::gtest
     GTest::gtest_main
