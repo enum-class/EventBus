@@ -21,12 +21,18 @@ target_include_directories(SuperQueueLib INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/superqueue>
     $<INSTALL_INTERFACE:superqueue>)
 
+add_library(SuperFactoryLib INTERFACE)
+target_include_directories(SuperFactoryLib INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/superfactory>
+    $<INSTALL_INTERFACE:superfactory>)
+
 find_package(GTest)
 find_package(Threads REQUIRED)
 
 add_executable(EventProcessorTest tests/AllTests.cpp)
 target_link_libraries(EventProcessorTest
     SuperQueueLib
+    SuperFactoryLib
     Threads::Threads
     GTest::gtest
     GTest::gtest_main
