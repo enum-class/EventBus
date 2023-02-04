@@ -2,6 +2,4 @@
 
 #include "SuperQueueTest.h"
 
-TEST(SuperQueueTest, logic) {
-    super_queue_logic_test();
-}
+TEST(SuperQueueTest, logic) { super_queue_logic_test(); }

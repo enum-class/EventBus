@@ -1,5 +1,4 @@
 #pragma once
-
 #include <SuperQueueCore.h>
 
 namespace {
@@ -44,8 +43,8 @@ unsigned int move_consumer_head(superqueue::SuperQueue *tr, unsigned int n,
   return n;
 }
 
-void dequeue_memory(superqueue::SuperQueue *tr, uint32_t cons_head, void *obj_table,
-                    uint32_t n) noexcept {
+void dequeue_memory(superqueue::SuperQueue *tr, uint32_t cons_head,
+                    void *obj_table, uint32_t n) noexcept {
   unsigned int i = 0;
   const uint32_t size = tr->size;
   uint32_t idx = cons_head & tr->mask;
@@ -95,12 +94,12 @@ unsigned int move_producer_head(superqueue::SuperQueue *tr, unsigned int n,
 }
 
 template <superqueue::SyncType sync>
-void update_tail(superqueue::HeadTail *ht, uint32_t old_val, uint32_t new_val) noexcept {
-  if constexpr (sync == superqueue::SyncType::MULTI_THREAD)
-  {
-      while (ht->tail.load(std::memory_order_relaxed) != old_val) {
-        //_mm_pause();
-      }
+void update_tail(superqueue::HeadTail *ht, uint32_t old_val,
+                 uint32_t new_val) noexcept {
+  if constexpr (sync == superqueue::SyncType::MULTI_THREAD) {
+    while (ht->tail.load(std::memory_order_relaxed) != old_val) {
+      //_mm_pause();
+    }
   }
 
   ht->tail.store(new_val, std::memory_order_release);
