@@ -1,0 +1,98 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 14, 
+    "patch": 0
+  },  
+  "configurePresets": [
+      {
+          "name": "cmake-pedantic",
+          "hidden": true,
+          "warnings": {
+              "dev": true,
+              "deprecated": true,
+              "uninitialized": false,
+              "unusedCli": true,
+              "systemVars": false
+          },
+          "errors": {
+              "dev": true,
+              "deprecated": false
+          }
+      },
+      {
+          "name": "dev-mode",
+          "hidden": true,
+          "inherits": "cmake-pedantic",
+          "cacheVariables": {
+              "CMAKE_CXX_FLAGS": "-O0 -gdwarf"
+          }
+      },
+      {
+          "name": "debug",
+          "binaryDir": "${sourceDir}/Debug",
+          "hidden": true,
+          "inherits": "dev-mode",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Debug"
+          }
+      },
+      {
+          "name": "release",
+          "binaryDir": "${sourceDir}/Release",
+          "hidden": true,
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release",
+              "CMAKE_CXX_FLAGS": "-O3"
+          }
+      },
+      {
+          "name": "flags-unix",
+          "hidden": true,
+          "cacheVariables": {
+              "CMAKE_CXX_FLAGS": ""
+          }
+      },
+      {
+          "name": "flags-std",
+          "description": "This preset makes sure the project actually builds with at least the specified standard",
+          "hidden": true,
+          "cacheVariables": {
+              "CMAKE_CXX_EXTENSIONS": "OFF",
+              "CMAKE_CXX_STANDARD": "20",
+              "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+          }
+      },
+      {
+          "name": "flags-windows",
+          "description": "Note that all the flags after /W4 are required for MSVC to conform to the language standard",
+          "hidden": true,
+          "cacheVariables": {
+              "CMAKE_CXX_FLAGS": "/utf-8 /W4 /permissive- /volatile:iso /Zc:preprocessor /EHsc /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew"
+          }
+      },
+      {
+          "name": "unix-release",
+          "generator": "Unix Makefiles",
+          "inherits": ["release", "flags-unix", "flags-std"]
+      },
+      {
+          "name": "unix-dev",
+          "generator": "Unix Makefiles",
+          "inherits": ["debug", "flags-unix", "flags-std"]
+      },
+      {
+          "name": "windows-release-x64",
+          "generator": "Visual Studio 17 2022",
+          "architecture": "x64",
+          "inherits": ["release", "flags-windows", "flags-std"]
+      },
+      {
+          "name": "windows-dev-x64",
+          "generator": "Visual Studio 17 2022",
+          "architecture": "x64",
+          "inherits": ["debug", "flags-windows", "flags-std"]
+      }
+  ]
+}
