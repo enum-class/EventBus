@@ -32,28 +32,27 @@ static inline void release(SuperMemPool *mempool, uint8_t *buffer) noexcept {
                       superqueue::Behavior::FIXED>(mempool->pool, buffer);
 }
 
-} // namespace
+}  // namespace
 
 namespace superfactory {
 
-template <std::size_t SIZE, std::size_t BLOCK> class SuperFactory {
+template<std::size_t SIZE, std::size_t BLOCK> class SuperFactory {
   SuperMemPool *mempool = nullptr;
 
-public:
+ public:
   SuperFactory() : mempool(create_pool(SIZE, BLOCK)) {}
 
-  template <class TEvent, class... Args> TEvent *create(Args... args) {
+  template<class TEvent, class... Args> TEvent *create(Args... args) {
     uint8_t *buf = acquire(mempool);
-    if (buf)
-      return new (buf) TEvent(std::forward<Args>(args)...);
+    if (buf) return new (buf) TEvent(std::forward<Args>(args)...);
 
     return nullptr;
   }
 
-  template <class TEvent> void recycle(TEvent *event) {
+  template<class TEvent> void recycle(TEvent *event) {
     event->~TEvent();
     release(mempool, reinterpret_cast<uint8_t *>(event));
   }
 };
 
-} // namespace superfactory
+}  // namespace superfactory
