@@ -16,17 +16,17 @@ conan_cmake_install(PATH_OR_REFERENCE .
                     REMOTE conancenter
                     SETTINGS ${settings})
 
-add_library(EventProcessorlib INTERFACE)
-target_include_directories(EventProcessorlib INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
+add_library(SuperQueueLib INTERFACE)
+target_include_directories(SuperQueueLib INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/superqueue>
+    $<INSTALL_INTERFACE:superqueue>)
 
 find_package(GTest)
 find_package(Threads REQUIRED)
 
-add_executable(EventProcessorTest tests/tests.cpp)
+add_executable(EventProcessorTest tests/AllTests.cpp)
 target_link_libraries(EventProcessorTest
-    EventProcessorlib
+    SuperQueueLib
     Threads::Threads
     GTest::gtest
     GTest::gtest_main
