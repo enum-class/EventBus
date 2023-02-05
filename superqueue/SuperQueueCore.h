@@ -27,7 +27,7 @@ struct HeadTail {
 };
 
 struct SuperQueue {
-  const uint8_t *memzone = nullptr;
+  const uint64_t *memzone = nullptr;
   uint32_t size = 0;
   uint32_t mask = 0;
   uint32_t capacity = 0;

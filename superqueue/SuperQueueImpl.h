@@ -50,7 +50,7 @@ void dequeue_memory(superqueue::SuperQueue *tr, uint32_t cons_head,
   uint32_t idx = cons_head & tr->mask;
   uint64_t *ring = (uint64_t *)&tr[1];
   uint64_t *obj = (uint64_t *)obj_table;
-  obj[i++] = ring[idx++];
+  obj[i] = ring[idx];
 }
 
 template <superqueue::SyncType sync, superqueue::Behavior behavior>
@@ -113,7 +113,7 @@ void enqueue_memory(superqueue::SuperQueue *tr, uint32_t prod_head,
   uint64_t *ring = (uint64_t *)&tr[1];
   const uint64_t *obj = (const uint64_t *)obj_table;
 
-  ring[idx++] = obj[i++];
+  ring[idx] = obj[i];
 }
 } // namespace
 

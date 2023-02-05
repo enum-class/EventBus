@@ -6,8 +6,8 @@
 template<std::size_t Q_SIZE, std::size_t POOL_SIZE = Q_SIZE,
          std::size_t BLOCK = 64>
 class EventBus final {
-  superfactory::SuperFactory<POOL_SIZE, BLOCK> factory;
   superqueue::SuperQueue *queue = nullptr;
+  superfactory::SuperFactory<POOL_SIZE, BLOCK> factory;
 
  public:
   EventBus() : queue(superqueue::create(Q_SIZE)) {}
@@ -19,6 +19,11 @@ class EventBus final {
       return superqueue::enqueue<superqueue::SyncType::MULTI_THREAD,
                                  superqueue::Behavior::FIXED>(queue, event);
     return false;
+  }
+
+  ~EventBus() {
+    superqueue::free(queue);
+    queue = nullptr;
   }
 
   template<class TEvent> bool process_next() noexcept {

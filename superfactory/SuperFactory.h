@@ -12,15 +12,24 @@ struct SuperMemPool {
 static inline SuperMemPool *create_pool(std::size_t size, std::size_t block) {
   SuperMemPool *mempool = new SuperMemPool;
   mempool->pool = superqueue::create(size);
+
   mempool->data = new uint8_t[size * block];
 
   for (int i = 0; i < size; i++) {
-    superqueue::enqueue<superqueue::SyncType::SINGLE_THREAD,
-                        superqueue::Behavior::FIXED>(mempool->pool,
-                                                     &mempool->data[i * block]);
+    if (!superqueue::enqueue<superqueue::SyncType::SINGLE_THREAD,
+                             superqueue::Behavior::FIXED>(
+            mempool->pool, &mempool->data[i * block]))
+      throw;
   }
 
   return mempool;
+}
+
+static inline void free_pool(SuperMemPool *pool) {
+  superqueue::free(pool->pool);
+  delete[] pool->data;
+  pool->data = nullptr;
+  pool->pool = nullptr;
 }
 
 static inline uint8_t *acquire(SuperMemPool *mempool) noexcept {
@@ -38,12 +47,12 @@ static inline void release(SuperMemPool *mempool, uint8_t *buffer) noexcept {
 
 namespace superfactory {
 
-template<std::size_t SIZE, std::size_t BLOCK> class SuperFactory {
+template<std::size_t SIZE, std::size_t BLOCK> class SuperFactory final {
   SuperMemPool *mempool = nullptr;
 
  public:
   SuperFactory() : mempool(create_pool(SIZE, BLOCK)) {}
-
+  ~SuperFactory() { free_pool(mempool); }
   template<class TEvent, class... Args> TEvent *create(Args... args) {
     uint8_t *buf = acquire(mempool);
     if (buf) return new (buf) TEvent(std::forward<Args>(args)...);

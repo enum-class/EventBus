@@ -40,7 +40,7 @@ static inline SuperQueue *create(std::size_t size) noexcept {
   if (real_size == 0)
     return nullptr;
 
-  uint8_t *mz = new uint8_t[real_size];
+  uint64_t *mz = new uint64_t[real_size];
   tr = reinterpret_cast<superqueue::SuperQueue *>(mz);
   std::memset(tr, 0, sizeof(*tr));
   tr->size = size;
