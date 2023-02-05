@@ -2,17 +2,18 @@
 #include <SuperQueueCore.h>
 #include <SuperQueueImpl.h>
 
+#include <cstddef>
 #include <cstring>
 
 namespace {
-std::size_t calculate_memsize_element(unsigned int size,
-                                      unsigned int count) noexcept {
+auto calculate_memsize_element(unsigned int size,
+                                      unsigned int count) noexcept -> std::size_t {
   std::size_t sz = sizeof(superqueue::SuperQueue) + count * size;
   sz = ALIGN(sz, superqueue::CACHE_LINE_SIZE);
   return sz;
 }
 
-uint32_t combine32ms1b(uint32_t x) noexcept {
+auto combine32ms1b(uint32_t x) noexcept -> uint32_t {
   x |= x >> 1;
   x |= x >> 2;
   x |= x >> 4;
@@ -22,7 +23,7 @@ uint32_t combine32ms1b(uint32_t x) noexcept {
   return x;
 }
 
-uint32_t align32pow2(uint32_t x) noexcept {
+auto align32pow2(uint32_t x) noexcept -> uint32_t {
   x--;
   x = combine32ms1b(x);
 
@@ -31,16 +32,17 @@ uint32_t align32pow2(uint32_t x) noexcept {
 } // namespace
 
 namespace superqueue {
-static inline SuperQueue *create(std::size_t size) noexcept {
+static inline auto create(std::size_t size) noexcept -> SuperQueue * {
   superqueue::SuperQueue *tr = nullptr;
   const unsigned int req_count = size;
 
   size = align32pow2(size + 1);
   std::size_t real_size = calculate_memsize_element(sizeof(uint8_t), size);
-  if (real_size == 0)
+  if (real_size == 0) {
     return nullptr;
+}
 
-  uint64_t *mz = new uint64_t[real_size];
+  auto *mz = new uint64_t[real_size];
   tr = reinterpret_cast<superqueue::SuperQueue *>(mz);
   std::memset(tr, 0, sizeof(*tr));
   tr->size = size;
@@ -61,36 +63,36 @@ static inline void reset(SuperQueue *tr) noexcept {
 }
 
 template <SyncType sync, Behavior behavior>
-static inline bool enqueue(SuperQueue *tr, void *obj,
-                           unsigned int n = 1) noexcept {
+static inline auto enqueue(SuperQueue *tr, void *obj,
+                           unsigned int n = 1) noexcept -> bool {
   unsigned int free_space = 0;
   return core::do_enqueue<sync, behavior>(tr, &obj, n, &free_space);
 }
 
 template <SyncType sync, Behavior behavior>
-static inline void *dequeue(SuperQueue *tr, unsigned int n = 1) noexcept {
+static inline auto dequeue(SuperQueue *tr, unsigned int n = 1) noexcept -> void * {
   unsigned int free_space = 0;
   void *obj = nullptr;
   auto ret = core::do_dequeue<sync, behavior>(tr, &obj, n, &free_space);
   return obj;
 }
 
-static inline unsigned int count_entries(const SuperQueue *tr) noexcept {
+static inline auto count_entries(const SuperQueue *tr) noexcept -> unsigned int {
   uint32_t prod_tail = tr->producer.tail;
   uint32_t cons_tail = tr->consumer.tail;
   uint32_t count = (prod_tail - cons_tail) & tr->mask;
   return (count > tr->capacity) ? tr->capacity : count;
 }
 
-static inline std::size_t count_free_entries(const SuperQueue *tr) noexcept {
+static inline auto count_free_entries(const SuperQueue *tr) noexcept -> std::size_t {
   return tr->capacity - superqueue::count_entries(tr);
 }
 
-static inline bool is_full(const SuperQueue *tr) noexcept {
+static inline auto is_full(const SuperQueue *tr) noexcept -> bool {
   return superqueue::count_free_entries(tr) == 0;
 }
 
-static inline bool is_empty(const SuperQueue *tr) noexcept {
+static inline auto is_empty(const SuperQueue *tr) noexcept -> bool {
   uint32_t prod_tail = tr->producer.tail;
   uint32_t cons_tail = tr->consumer.tail;
   return cons_tail == prod_tail;

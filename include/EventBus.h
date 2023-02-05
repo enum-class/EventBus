@@ -13,12 +13,13 @@ class EventBus final {
   EventBus() : queue(superqueue::create(Q_SIZE)) {}
 
   template<class TEvent, class... Args>
-  inline bool send(Args... args) noexcept {
-    TEvent *event =
+  inline auto send(Args... args) noexcept -> bool {
+    auto *event =
         factory.template create<TEvent>(std::forward<Args>(args)...);
-    if (event) [[likely]]
+    if (event) { [[likely]]
       return superqueue::enqueue<superqueue::SyncType::MULTI_THREAD,
                                  superqueue::Behavior::FIXED>(queue, event);
+}
     return false;
   }
 
@@ -27,13 +28,13 @@ class EventBus final {
     queue = nullptr;
   }
 
-  template<class TEvent> inline bool process_next() noexcept {
+  template<class TEvent> inline auto process_next() noexcept -> bool {
     auto *data = superqueue::dequeue<superqueue::SyncType::SINGLE_THREAD,
                                      superqueue::Behavior::FIXED>(queue);
 
     if (data) [[likely]] {
-      TEvent *ev = reinterpret_cast<TEvent *>(data);
-      // TODO: pass process function
+      auto *ev = reinterpret_cast<TEvent *>(data);
+      // TODO(saman): pass process function
       ev->process();
       factory.template recycle<TEvent>(ev);
       return true;

@@ -9,8 +9,8 @@ struct SuperMemPool {
   superqueue::SuperQueue *pool = nullptr;
 };
 
-static inline SuperMemPool *create_pool(std::size_t size, std::size_t block) {
-  SuperMemPool *mempool = new SuperMemPool;
+inline auto create_pool(std::size_t size, std::size_t block) -> SuperMemPool * {
+  auto *mempool = new SuperMemPool;
   mempool->pool = superqueue::create(size);
 
   mempool->data = new uint8_t[size * block];
@@ -18,27 +18,28 @@ static inline SuperMemPool *create_pool(std::size_t size, std::size_t block) {
   for (int i = 0; i < size; i++) {
     if (!superqueue::enqueue<superqueue::SyncType::SINGLE_THREAD,
                              superqueue::Behavior::FIXED>(
-            mempool->pool, &mempool->data[i * block]))
+            mempool->pool, &mempool->data[i * block])) {
       throw;
+}
   }
 
   return mempool;
 }
 
-static inline void free_pool(SuperMemPool *pool) {
+inline void free_pool(SuperMemPool *pool) {
   superqueue::free(pool->pool);
   delete[] pool->data;
   pool->data = nullptr;
   pool->pool = nullptr;
 }
 
-static inline uint8_t *acquire(SuperMemPool *mempool) noexcept {
-  return (uint8_t *)superqueue::dequeue<superqueue::SyncType::MULTI_THREAD,
+inline auto acquire(SuperMemPool *mempool) noexcept -> uint8_t * {
+  return static_cast<uint8_t *>(superqueue::dequeue<superqueue::SyncType::MULTI_THREAD,
                                         superqueue::Behavior::FIXED>(
-      mempool->pool, 1);
+      mempool->pool, 1));
 }
 
-static inline void release(SuperMemPool *mempool, uint8_t *buffer) noexcept {
+inline void release(SuperMemPool *mempool, uint8_t *buffer) noexcept {
   superqueue::enqueue<superqueue::SyncType::SINGLE_THREAD,
                       superqueue::Behavior::FIXED>(mempool->pool, buffer);
 }
@@ -54,10 +55,11 @@ template<std::size_t SIZE, std::size_t BLOCK> class SuperFactory final {
   SuperFactory() : mempool(create_pool(SIZE, BLOCK)) {}
   ~SuperFactory() { free_pool(mempool); delete mempool;}
   template<class TEvent, class... Args>
-  inline TEvent *create(Args... args) noexcept {
+  inline auto create(Args... args) noexcept -> TEvent * {
     uint8_t *buf = acquire(mempool);
-    if (buf) [[likely]]
+    if (buf) { [[likely]]
       return new (buf) TEvent(std::forward<Args>(args)...);
+}
 
     return nullptr;
   }

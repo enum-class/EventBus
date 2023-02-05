@@ -6,13 +6,14 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <utility>
 #include <vector>
 
-typedef std::chrono::high_resolution_clock Clock;
+using Clock = std::chrono::high_resolution_clock;
 
 std::string results;
 
-int set_thread_core(int core_id) {
+auto set_thread_core(int core_id) -> int {
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
   CPU_SET(core_id, &cpuset);
@@ -34,8 +35,8 @@ public:
     {
     }
     
-    ~Ev1() {}
-    virtual void process() const noexcept override {
+    ~Ev1() override = default;
+    void process() const noexcept override {
       results = std::to_string(val1 * val2 * val3);
     }
 };
@@ -46,14 +47,14 @@ public:
     double val2;
 
     Ev2(auto v1, auto v2)
-    : val1(v1)
+    : val1(std::move(v1))
     , val2(v2)
     {
     }
 
-    ~Ev2() {}
+    ~Ev2() override = default;
 
-    virtual void process() const noexcept override {
+    void process() const noexcept override {
       results = std::to_string(val1.size() * val2);
     }
 };
@@ -62,14 +63,14 @@ class Ev3 : public IEvent {
 public:
     uint64_t val1;
 
-    Ev3(auto v1)
+    explicit Ev3(auto v1)
     : val1(v1)
     {
     }
 
-    ~Ev3() {}
+    ~Ev3() override = default;
 
-    virtual void process() const noexcept override {
+    void process() const noexcept override {
       results = std::to_string(val1 * val1);
     }
 };
@@ -83,7 +84,8 @@ auto benchmark_run(auto &bus, std::size_t number_of_events_per_producer,
   std::vector<std::jthread> producers;
   auto start_time = Clock::now();
 
-  for (int i = 0; i < number_of_producers; i++) {
+  producers.reserve(number_of_producers);
+for (int i = 0; i < number_of_producers; i++) {
     producers.push_back(std::jthread(
         [&](int id) {
           set_thread_core(id + 1);
@@ -117,7 +119,7 @@ auto benchmark_run(auto &bus, std::size_t number_of_events_per_producer,
       .count();
 }
 
-int main() {
+auto main() -> int {
   int repetition = 3;
   std::size_t event_count = 100000000;
   set_thread_core(0);

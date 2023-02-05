@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <SuperQueue.h>
 
-static inline bool super_queue_logic_test() {
+static inline auto super_queue_logic_test() -> bool {
     superqueue::SuperQueue* tr = superqueue::create(5);
     EXPECT_EQ(superqueue::is_empty(tr), true);
     EXPECT_EQ(superqueue::count_entries(tr), 0);

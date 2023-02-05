@@ -2,7 +2,7 @@
 #include <SuperFactory.h>
 
 
-static inline bool super_factory_logic_test() {
+static inline auto super_factory_logic_test() -> bool {
     superfactory::SuperFactory<2, 32> factory;
     
     class Event
@@ -18,17 +18,17 @@ static inline bool super_factory_logic_test() {
         }
     };
 
-    Event* ev1 = factory.create<Event>(1 , 2);
+    auto* ev1 = factory.create<Event>(1 , 2);
     EXPECT_NE(ev1, nullptr);
     EXPECT_EQ(ev1->data, 1);
     EXPECT_EQ(ev1->value, 2);
 
-    Event* ev2 = factory.create<Event>(3 , 4);
+    auto* ev2 = factory.create<Event>(3 , 4);
     EXPECT_NE(ev2, nullptr);
     EXPECT_EQ(ev2->data, 3);
     EXPECT_EQ(ev2->value, 4);
 
-    Event* ev3 = factory.create<Event>(5 , 6);
+    auto* ev3 = factory.create<Event>(5 , 6);
     EXPECT_EQ(ev3, nullptr);
     
     factory.recycle<Event>(ev1);
