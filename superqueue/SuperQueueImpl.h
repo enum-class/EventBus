@@ -2,10 +2,12 @@
 #include <SuperQueueCore.h>
 
 namespace {
-template <superqueue::SyncType sync, superqueue::Behavior behavior>
-unsigned int move_consumer_head(superqueue::SuperQueue *tr, unsigned int n,
-                                uint32_t *old_head, uint32_t *new_head,
-                                uint32_t *entries) noexcept {
+template<superqueue::SyncType sync, superqueue::Behavior behavior>
+static inline unsigned int move_consumer_head(superqueue::SuperQueue *tr,
+                                              unsigned int n,
+                                              uint32_t *old_head,
+                                              uint32_t *new_head,
+                                              uint32_t *entries) noexcept {
   unsigned int max = n;
   uint32_t prod_tail = 0;
   int success = 0;
@@ -20,7 +22,7 @@ unsigned int move_consumer_head(superqueue::SuperQueue *tr, unsigned int n,
 
     *entries = (prod_tail - *old_head);
 
-    if (n > *entries) {
+    if (n > *entries) [[unlikely]] {
       if constexpr (behavior == superqueue::Behavior::FIXED)
         return 0;
       else {
@@ -43,8 +45,9 @@ unsigned int move_consumer_head(superqueue::SuperQueue *tr, unsigned int n,
   return n;
 }
 
-void dequeue_memory(superqueue::SuperQueue *tr, uint32_t cons_head,
-                    void *obj_table, uint32_t n) noexcept {
+static inline void dequeue_memory(superqueue::SuperQueue *tr,
+                                  uint32_t cons_head, void *obj_table,
+                                  uint32_t n) noexcept {
   unsigned int i = 0;
   const uint32_t size = tr->size;
   uint32_t idx = cons_head & tr->mask;
@@ -53,10 +56,12 @@ void dequeue_memory(superqueue::SuperQueue *tr, uint32_t cons_head,
   obj[i] = ring[idx];
 }
 
-template <superqueue::SyncType sync, superqueue::Behavior behavior>
-unsigned int move_producer_head(superqueue::SuperQueue *tr, unsigned int n,
-                                uint32_t *old_head, uint32_t *new_head,
-                                uint32_t *free_entries) noexcept {
+template<superqueue::SyncType sync, superqueue::Behavior behavior>
+static inline unsigned int move_producer_head(superqueue::SuperQueue *tr,
+                                              unsigned int n,
+                                              uint32_t *old_head,
+                                              uint32_t *new_head,
+                                              uint32_t *free_entries) noexcept {
   const uint32_t capacity = tr->capacity;
   uint32_t cons_tail = 0;
   unsigned int max = n;
@@ -70,7 +75,7 @@ unsigned int move_producer_head(superqueue::SuperQueue *tr, unsigned int n,
 
     *free_entries = (capacity + cons_tail - *old_head);
 
-    if (n > *free_entries) {
+    if (n > *free_entries) [[unlikely]] {
       if constexpr (behavior == superqueue::Behavior::FIXED)
         return 0;
       else {
@@ -93,9 +98,9 @@ unsigned int move_producer_head(superqueue::SuperQueue *tr, unsigned int n,
   return n;
 }
 
-template <superqueue::SyncType sync>
-void update_tail(superqueue::HeadTail *ht, uint32_t old_val,
-                 uint32_t new_val) noexcept {
+template<superqueue::SyncType sync>
+static inline void update_tail(superqueue::HeadTail *ht, uint32_t old_val,
+                               uint32_t new_val) noexcept {
   if constexpr (sync == superqueue::SyncType::MULTI_THREAD) {
     while (ht->tail.load(std::memory_order_relaxed) != old_val) {
       //_mm_pause();
@@ -105,8 +110,9 @@ void update_tail(superqueue::HeadTail *ht, uint32_t old_val,
   ht->tail.store(new_val, std::memory_order_release);
 }
 
-void enqueue_memory(superqueue::SuperQueue *tr, uint32_t prod_head,
-                    const void *obj_table, uint32_t n) noexcept {
+static inline void enqueue_memory(superqueue::SuperQueue *tr,
+                                  uint32_t prod_head, const void *obj_table,
+                                  uint32_t n) noexcept {
   unsigned int i = 0;
   const uint32_t size = tr->size;
   uint32_t idx = prod_head & tr->mask;
@@ -118,9 +124,10 @@ void enqueue_memory(superqueue::SuperQueue *tr, uint32_t prod_head,
 } // namespace
 
 namespace core {
-template <superqueue::SyncType sync, superqueue::Behavior behavior>
-bool do_enqueue(superqueue::SuperQueue *tr, const void *obj, unsigned int n,
-                unsigned int *free_space) noexcept {
+template<superqueue::SyncType sync, superqueue::Behavior behavior>
+static inline bool do_enqueue(superqueue::SuperQueue *tr, const void *obj,
+                              unsigned int n,
+                              unsigned int *free_space) noexcept {
   uint32_t prod_head = 0, prod_next = 0;
   uint32_t free_entries = 0;
 
@@ -138,9 +145,10 @@ bool do_enqueue(superqueue::SuperQueue *tr, const void *obj, unsigned int n,
   return true;
 }
 
-template <superqueue::SyncType sync, superqueue::Behavior behavior>
-bool do_dequeue(superqueue::SuperQueue *tr, void *obj, unsigned int n,
-                unsigned int *available) noexcept {
+template<superqueue::SyncType sync, superqueue::Behavior behavior>
+static inline bool do_dequeue(superqueue::SuperQueue *tr, void *obj,
+                              unsigned int n,
+                              unsigned int *available) noexcept {
   uint32_t cons_head = 0, cons_next = 0;
   uint32_t entries = 0;
 
