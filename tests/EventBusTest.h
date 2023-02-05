@@ -56,7 +56,7 @@ static inline bool event_bus_logic_test() {
 
 static inline bool event_bus_thread_test(std::size_t producers_count) {
   result.clear();
-  static constexpr size_t GEN_SIZE = 10000;
+  static constexpr size_t GEN_SIZE = 1000000;
   EventBus<150> bus;
 
   std::vector<std::jthread> producers;

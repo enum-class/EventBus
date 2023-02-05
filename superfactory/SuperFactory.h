@@ -52,7 +52,7 @@ template<std::size_t SIZE, std::size_t BLOCK> class SuperFactory final {
 
  public:
   SuperFactory() : mempool(create_pool(SIZE, BLOCK)) {}
-  ~SuperFactory() { free_pool(mempool); }
+  ~SuperFactory() { free_pool(mempool); delete mempool;}
   template<class TEvent, class... Args> TEvent *create(Args... args) {
     uint8_t *buf = acquire(mempool);
     if (buf) return new (buf) TEvent(std::forward<Args>(args)...);
