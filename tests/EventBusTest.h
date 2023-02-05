@@ -10,13 +10,13 @@ std::vector<int> result;
 class Event1 : public IEvent {
  public:
   int16_t id;
-  uint16_t value;
+  std::string value;
 
   Event1(auto id_, auto value_) : id(id_), value(value_) {}
 
   ~Event1() {}
 
-  virtual void process() override { result.push_back(id * value); }
+  virtual void process() const noexcept override { result.push_back(id * value.size()); }
 };
 
 class Event2 : public IEvent {
@@ -28,19 +28,19 @@ class Event2 : public IEvent {
 
   ~Event2() {}
 
-  virtual void process() override { result.push_back(id + value); }
+  virtual void process() const noexcept override { result.push_back(id + value); }
 };
 
 static inline bool event_bus_logic_test() {
   EventBus<2> bus;
 
-  EXPECT_TRUE(bus.send<Event1>(1, 2));
+  EXPECT_TRUE(bus.send<Event1>(1, "2"));
   EXPECT_TRUE(bus.send<Event2>(333, 444));
   EXPECT_FALSE(bus.send<Event2>(444, 666));
 
   bus.process_next<IEvent>();
   EXPECT_EQ(result.size(), 1);
-  EXPECT_EQ(result.at(0), 1 * 2);
+  EXPECT_EQ(result.at(0), 1);
 
   EXPECT_TRUE(bus.send<Event2>(444, 666));
 
@@ -63,7 +63,7 @@ static inline bool event_bus_thread_test(std::size_t producers_count) {
   for (int i = 0; i < producers_count; i++) {
     producers.push_back(std::jthread([&]() {
       for (int i = 0; i < GEN_SIZE; i++) {
-        while (!bus.send<Event1>(i, i * i)) {
+        while (!bus.send<Event1>(i, "i * i")) {
           std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
       }

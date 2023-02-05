@@ -44,5 +44,13 @@ target_link_libraries(EventProcessorTest
     GTest::gtest_main
 )
 
+add_executable(BenchMark benchmarks/Benchmarks.cpp)
+target_link_libraries(BenchMark
+    SuperQueueLib
+    SuperFactoryLib
+    EventBusLib
+    Threads::Threads
+)
+
 enable_testing()
 add_test(test_all EventProcessorTest)

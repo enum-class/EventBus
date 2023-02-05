@@ -3,5 +3,5 @@
 class IEvent {
  public:
   virtual ~IEvent() = default;
-  virtual void process() = 0;
+  virtual void process() const noexcept = 0;
 };
