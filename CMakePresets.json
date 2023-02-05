@@ -26,7 +26,8 @@
           "hidden": true,
           "inherits": "cmake-pedantic",
           "cacheVariables": {
-              "CMAKE_CXX_FLAGS": "-O0 -gdwarf"
+              "CMAKE_CXX_FLAGS": "-O0 -gdwarf -pg",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
           }
       },
       {
@@ -55,6 +56,20 @@
           }
       },
       {
+          "name": "clang-compiler",
+          "hidden": true,
+          "cacheVariables": {
+              "CMAKE_CXX_COMPILER": "clang++"
+          }
+      },
+      {
+          "name": "gcc-compiler",
+          "hidden": true,
+          "cacheVariables": {
+              "CMAKE_CXX_COMPILER": "g++"
+          }
+      },
+      {
           "name": "flags-std",
           "description": "This preset makes sure the project actually builds with at least the specified standard",
           "hidden": true,
@@ -75,12 +90,12 @@
       {
           "name": "unix-release",
           "generator": "Unix Makefiles",
-          "inherits": ["release", "flags-unix", "flags-std"]
+          "inherits": ["release", "flags-unix", "flags-std", "clang-compiler"]
       },
       {
           "name": "unix-dev",
           "generator": "Unix Makefiles",
-          "inherits": ["debug", "flags-unix", "flags-std"]
+          "inherits": ["debug", "flags-unix", "flags-std", "clang-compiler"]
       },
       {
           "name": "windows-release-x64",
