@@ -17,3 +17,14 @@ cmake --build {Release/Debug}
 cmake --preset={windows-release-x64/windows-dev-x64}
 cd {Release/Debug}
 msbuild.exe HFT.sln /p:Configuration={Release/Debug} /p:Platform=x64
+```
+## Benchmark <a name="benchmark"></a>
+CPU : 12th Gen Intel(R) Core(TM) i7-1265U
+
+| Queue size 1000 with 64 byte blocks |                   |
+|--------------------------------------|-------------------|
+|     Million  operation per second    | Number of threads |
+| 16                                   | 1                 |
+| 10                                   | 2                 |
+| 8                                    | 4                 |
+| 7                                    | 8                 |
