@@ -28,3 +28,28 @@ CPU : 12th Gen Intel(R) Core(TM) i7-1265U
 | 10                                   | 2                 |
 | 8                                    | 4                 |
 | 7                                    | 8                 |
+
+## Profile
+
+### Prerequisites
+```
+cmake --preset unix-profile
+cmake --build Profile
+```
+### valgrind
+```
+./scripts/valgrind.sh Profile/BenchMark
+```
+
+### gprof
+```
+./BenchMark
+ls gmon.out
+gprof Profile/BenchMark gmon.out > profile.txt
+```
+
+### valgrind/callgrind
+```
+valgrind --tool=callgrind ./BenchMark
+kcachegrind profile.callgrind
+```
