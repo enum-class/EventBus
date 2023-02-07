@@ -57,9 +57,9 @@ template<std::size_t SIZE, std::size_t BLOCK> class SuperFactory final {
   template<class TEvent, class... Args>
   inline auto create(Args... args) noexcept -> TEvent * {
     uint8_t *buf = acquire(mempool);
-    if (buf) { [[likely]]
+    if (buf) [[likely]] {
       return new (buf) TEvent(std::forward<Args>(args)...);
-}
+    }
 
     return nullptr;
   }
