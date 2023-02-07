@@ -55,4 +55,6 @@ kcachegrind profile.callgrind
 ```
 
 ### Idea
-Current bottle neck is in single thread consumer. I will try multi-consumer mode
+I have add batch read/write. I mean acquire memory in batch and then fill them and send to reduce contention between writer threads.
+But After this change there is not improvment and the reason is current bottle-neck is in single thread consumer side.
+I will try multi-consumer mode.
