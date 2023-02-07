@@ -56,5 +56,23 @@ kcachegrind profile.callgrind
 
 ### Idea
 I have add batch read/write. I mean acquire memory in batch and then fill them and send to reduce contention between writer threads.
+In acquire function :
+```cpp
++  static constexpr int BATCH = 5;                                                                                      
++  static thread_local int index = BATCH;                                                                               
++  static thread_local uint8_t *data = nullptr;                                                                         
++                                                                                                                       
++  if (index == BATCH) [[unlikely]] {                                                                                   
++    data = static_cast<uint8_t *>(superqueue::dequeue<superqueue::SyncType::MULTI_THREAD,                              
++                                        superqueue::Behavior::FIXED>(mempool->pool, BATCH));                           
++    if (data == nullptr) [[unlikely]]                                                                                  
++        return nullptr;                                                                                                
++    else                                                                                                               
++        index = 0;                                                                                                     
++  }                                                                                                                    
++                                                                                                                       
++  return data - (index++ * BLOCK);                                                                                     
+
+```
 But After this change there is not improvment and the reason is current bottle-neck is in single thread consumer side.
 I will try multi-consumer mode.
