@@ -16,10 +16,10 @@ class EventBus final {
   inline auto send(Args... args) noexcept -> bool {
     auto *event =
         factory.template create<TEvent>(std::forward<Args>(args)...);
-    if (event) { [[likely]]
+    if (event) [[likely]] {
       return superqueue::enqueue<superqueue::SyncType::MULTI_THREAD,
                                  superqueue::Behavior::FIXED>(queue, event);
-}
+    }
     return false;
   }
 

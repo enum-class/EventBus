@@ -27,9 +27,7 @@ static inline auto move_consumer_head(superqueue::SuperQueue *tr,
         return 0;
       } else {
         n = *entries;
-        if (n == 0) { [[unlikely]]
-          return 0;
-}
+        if (n == 0) [[unlikely]] { return 0; }
       }
     }
 
