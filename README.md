@@ -53,3 +53,6 @@ gprof Profile/BenchMark gmon.out > profile.txt
 valgrind --tool=callgrind ./BenchMark
 kcachegrind profile.callgrind
 ```
+
+### Idea
+Current bottle neck is in single thread consumer. I will try multi-consumer mode
