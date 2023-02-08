@@ -33,7 +33,7 @@ static inline auto move_consumer_head(superqueue::SuperQueue *tr,
 
     *new_head = *old_head + n;
     if constexpr (sync == superqueue::SyncType::SINGLE_THREAD) {
-      tr->consumer.head = *new_head;
+      tr->consumer.head.store(*new_head, std::memory_order_relaxed);
       return n;
     } else {
       success = atomic_compare_exchange_strong_explicit(
@@ -87,7 +87,7 @@ static inline auto move_producer_head(superqueue::SuperQueue *tr,
 
     *new_head = *old_head + n;
     if constexpr (sync == superqueue::SyncType::SINGLE_THREAD) {
-      tr->producer.head = *new_head;
+      tr->producer.head.store(*new_head, std::memory_order_relaxed);
       return n;
     } else {
       success = atomic_compare_exchange_strong_explicit(
